@@ -1,20 +1,23 @@
 import pygame
-import coords
+import data
 import copy
 from os import system, path
 
 win = pygame.display.set_mode((800, 800))
 turret = pygame.image.load(path.join("assets", "turret.png"))
 turret = pygame.transform.scale(turret, (60, 60))
+enemy = pygame.image.load(path.join("assets", "test-enemy.png"))
+enemy = pygame.transform.scale(enemy, (20, 20))
 turretBuilder = copy.copy(turret)
 turretBuilder.set_alpha(80)
 pygame.display.set_caption("tower defense")
 pathList = []
 towers = []
+enemies = []
 
 def loadPath():
     global pathList
-    for i in coords.coords:
+    for i in data.coords:
         system("cls")
         pathRect = pygame.Rect(i[0], i[1], i[2], i[3])
         pathList.append(pathRect)
@@ -28,9 +31,17 @@ class Tower:
     def tr(self):
         return self.towerRect
 
+class Enemy:
+    def __init__(self, rect, speed, hp = 1):
+        self.enemyRect = rect
+        self.hp = hp
+        self.speed = speed
+    def er(self):
+        return self.enemyRect
 
 def main():
     global towers
+    global enemies
     loadPath()
     clock = pygame.time.Clock() 
     running = True
@@ -52,6 +63,9 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_w:
                     placing = not placing
+                if event.key == pygame.K_F11:
+                    enemies.append(Enemy(pygame.Rect(data.spawn[0], data.spawn[1], 10, 10), 2))
+                    print(enemies)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if placing:
                     colliding = False
@@ -61,9 +75,8 @@ def main():
                     for i in towers:
                         if pygame.Rect.colliderect(i.tr(), turretBox):
                             colliding = True
-                    if turretBox.x + turretBox.width > 800 or turretBox.y + turretBox.height > 800 or turretBox.x < 0 or turretBox.y < 0:
+                    if turretBox.x + turretBox.width > 800 or turretBox.y + turretBox.height > 800 or turretBox.x < 0 or turretBox.y < 0: # checks if box is in area completely
                         colliding = True
-                    print(turretBox.x)
                     if not colliding:
                         towers.append(Tower(copy.copy(turretBox)))
                         print(towers)
@@ -79,8 +92,17 @@ def main():
 
         for i in towers:
             win.blit(turret, (i.tr().x, i.tr().y))
+        
+        for i in enemies:
+            if i.er().x < data.moveTo[0][0]:
+                i.er().x += i.speed
+            if i.er().x > data.moveTo[0][0]:
+                i.er().x -= i.speed
+            win.blit(enemy, (i.er().x, i.er().y))
+
         if placing:
             win.blit(turretBuilder, (turretBox.x, turretBox.y))
+        
         pygame.display.update()
     pygame.quit()
 
