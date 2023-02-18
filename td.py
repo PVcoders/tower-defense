@@ -36,6 +36,8 @@ class Enemy:
         self.enemyRect = rect
         self.hp = hp
         self.speed = speed
+        self.pathNum = 0
+        self.moves = 0
     def er(self):
         return self.enemyRect
 
@@ -94,12 +96,34 @@ def main():
             win.blit(turret, (i.tr().x, i.tr().y))
         
         for i in enemies:
-            if i.er().x < data.moveTo[0][0]:
-                i.er().x += i.speed
-            if i.er().x > data.moveTo[0][0]:
-                i.er().x -= i.speed
+            i.moves += 1
+            if i.er().x < data.moveTo[i.pathNum][0]:
+                if i.er().x + i.speed > data.moveTo[i.pathNum][0]:
+                    i.er().x = data.moveTo[i.pathNum][0]
+                else:
+                    i.er().x += i.speed
+            elif i.er().x > data.moveTo[i.pathNum][0]:
+                if i.er().x - i.speed < data.moveTo[i.pathNum][0]:
+                    i.er().x = data.moveTo[i.pathNum][0]
+                else:
+                    i.er().x -= i.speed
+            if i.er().y < data.moveTo[i.pathNum][1]:
+                if i.er().y + i.speed > data.moveTo[i.pathNum][1]:
+                    i.er().y = data.moveTo[i.pathNum][1]
+                else:
+                    i.er().y += i.speed
+            elif i.er().y > data.moveTo[i.pathNum][1]:
+                if i.er().y - i.speed < data.moveTo[i.pathNum][1]:
+                    i.er().y = data.moveTo[i.pathNum][1]
+                else:
+                    i.er().y -= i.speed
+            elif i.er().x == data.moveTo[i.pathNum][0]:
+                i.pathNum += 1
+                print("Im there")
+            if i.pathNum == len(data.moveTo):
+                print("Leak")
+                enemies.remove(i)
             win.blit(enemy, (i.er().x, i.er().y))
-
         if placing:
             win.blit(turretBuilder, (turretBox.x, turretBox.y))
         
